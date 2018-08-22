@@ -54,3 +54,35 @@ def test_GDEF_LigatureCaret_bug155(caret_format):
     actual_ttx = _generate_ttx_dump(actual_path, ['GDEF'])
     expected_ttx = _get_expected_path(ttx_filename)
     assert differ([expected_ttx, actual_ttx, '-l', '2'])
+
+
+@pytest.mark.parametrize(
+    'feat_name',
+    [
+        'test_named_lookup',
+        'test_contextual_class_pair_overflow',
+        'test_singlepos_subtable_overflow',
+        'test_class_pair_subtable_overflow',
+        'test_class_pair_class_def_overflow',
+        'test_contextual_overflow',
+        'test_cursive_subtable_overflow',
+        'test_mark_to_base_subtable_overflow',
+        'test_mark_to_base_coverage_overflow',
+        'test_mark_to_base_subtable_overflow',
+        'test_mark_to_ligature_subtable_overflow',
+    ])
+def test_oveflow_report_bug313(feat_name):
+    from shutil import copyfile
+    input_filename = 'bug313/font.pfa'
+    feat_filename = 'bug313/{}.fea'.format(feat_name)
+    actual_path = _get_temp_file_path()
+    stderr_path = runner(
+        CMD + [
+            '-r', '-e', '-o',
+            'f', '_{}'.format(_get_input_path(input_filename)),
+            'ff', '_{}'.format(_get_input_path(feat_filename)),
+            'o', '_{}'.format(actual_path),
+            'shw'])
+    expected_path = _get_expected_path('bug313/{}.txt'.format(feat_name))
+    copyfile(stderr_path, expected_path)
+    assert differ([expected_path, stderr_path, '-l', '1'])
